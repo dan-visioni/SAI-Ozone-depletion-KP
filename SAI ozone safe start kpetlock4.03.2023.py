@@ -96,7 +96,7 @@ tse = np.array([0,2,7,12,17,22,27,32,37,42])  # yrs from 2023, five yr steps aft
 
 #-------------------------------------------------------------------------
 
-calculate baseline O3 depletion without SAI: 
+# calculate baseline O3 depletion without SAI: 
 # def odb(x, y = bNAT):
 # return (((c+(dc*x))/gmcl)*y)*k*2*dac
 # a = tts
@@ -172,14 +172,16 @@ k = np.zeros((np.size(prm.sadl),np.size(prm.gamma),np.size(cgas)), dtype = float
 for j,gamma_j in enumerate(prm.gamma):
     for i,sad_i in enumerate(prm.sadl):
         for l,cgas_l in enumerate(cgas):
-            k[i,j,l] =   0.25*gamma_j*cgas_l*sad_i 
-print(k[0])    
+            k[i,j,l] =   0.25*gamma_j*cgas_l*sad_i    
 print('')     
 # ---------------------------------------------------------------------------
 
 # # calculate ozone depletion resulting from addition of new aerosol in SAI 1K cooling scenario, variable start times
 
 dO23 = -(((c+(dc * t0))/gmcl) * ni)*k*2   # ozone depletion from (R1), 2023 SAI start (tts= 0) for 1K surface cooling, g cm^-3 s^-1
+
+print(dO23[0,0,0])
+
 #dO35 = -(((c+(dc * t3))/gmcl) * ni)*k*2  # ozone depletion from (R1), 2035 SAI start (tts=12) for 1K surface cooling, g cm^-3 s^-1
 #dO45 = -(((c+(dc * t5))/gmcl) * ni)*k*2  # ozone depletion from (R1), 2045 SAI start (tts=22) for 1K surface cooling, g cm^-3 s^-1
 
