@@ -22,6 +22,7 @@ rad = 0.05     # approx radius (um) of Antacrtic spring NAT aerosol, Fiebig et a
 ndN = 5e-4     # Antarctic (surface measured) NAT (number density cm^-3), Sept-Oct, Weimer et al, (2022) 
 dna = 1.5      # approx density of nitric acid HNO3 g/cm^3
 dH2O = 1.0     # density of H2O g/cm^3
+gms = mms/an   # molecular mass of sulfate (g/molec)
 #--------------------------------------------------------------------------
 t0 = 1
 # remaining Cl (as ratio) in atm at time (t) yrs in future from 2023
@@ -38,13 +39,13 @@ ma20 = da20/kma  # molec air / m^3 at 20 km
 # -------------------------------------------------------------------------
 
 # calculate density of Cl in g/cm^3
+gmcl = mmcl/an   # g/molec Cl
 mc20 = ma20 * prm.clr  # Cl molec/m^3 at 20 km
-mc20c = mc20*10**-6  # Cl molec/cm^3 at 20km
+mc20c = mc20*10**-6     # Cl molec/cm^3 at 20km
 dmc20 = ma20 * prm.dclr  # annual change in Cl molec/m^3 at 20km
 dmc20c = (dmc20)*10**-6  # annual change in Cl molec/cm^3 at 20km
-gmcl = mmcl/an     # g/molec Cl
-c20 = mc20c * gmcl  # Cl (g/cm^3) at 20 km
-dc20 = dmc20c * gmcl  # annual change in Cl (g/cm^3) at 20km
+c20 = mc20c * gmcl       # Cl (g/cm^3) at 20 km
+dc20 = dmc20c * gmcl     # annual change in Cl (g/cm^3) at 20km
 print(c20)
 c = c20
 dc = dc20
@@ -62,9 +63,9 @@ h18 = r18-(r18*sin60)
 vlc = (2/3)*(pi*((r25)**2)*h25)  # volume of larger cone (60-90s), Re + 25 km
 vsc = (2/3)*(pi*((r18)**2)*h18)  # volume of smaller cone (60-90s), Re + 18 km 
 vams = vlc - vsc      # volume of Antarctic mid strat 18-25 km altitude (60-90s) (km^3)
-vamsm = (vams)*10**9  # volume of Antarctic mid strat 18-25 km altitude (60-90s) (m^3)
+vamsm = (vams)*10**9 # volume of Antarctic mid strat 18-25 km altitude (60-90s) (m^3)
 
-#  global mid-stratosphere volume:
+#  calculate volume of global mid-stratosphere (18-25 km):
 #  vol25 = (4.0/3.0)*pi*r25**3.0  # volume of sphere of radius, earth + 25 km altitude
 #  vol18 = (4.0/3.0)*pi*r18**3.0  # volume of sphere of radius, earth + 18 km altitude
 #  vmsk = vol25 - vol18  # volume of mid stratosphere (km^3) from 18 to 25 km altitude
@@ -76,7 +77,7 @@ vNAT = (4/3)*pi*rad**3  # volume of representative NAT particle (um^3)
 vdN = vNAT*ndN*1e-12   # volume density of NAT (cm^3/cm^3 air)
 dNAT = ((dna + (dH2O*3))/4)  # liquid density of NAT (g/cm^3)
 dNTa = vdN * dNAT      # density of NAT in air (g NAT/cm^3 air)
-dNT20 = ((dNTa)*1e-3)/((da20)*1e-6)  #density of NAT in air (kg NAT/kg air) at 20 km altitude
+dNT20 = ((dNTa)*1e-3)/((da20)*1e-6)  #density of NAT in air (cm^3 NAT/cm^3 air) at 20 km altitude
 blae = dNTa            # baseline aerosol (density of NAT in air)
 #-------------------------------------------------------------------------
 
@@ -90,18 +91,17 @@ nib = xib/(ros*vib)  # number density of sulfate
 bNAT = 5e-4  # from Weimer et al (2023)  
 
 tts = np.linspace(1,prm.year_e-prm.year_b+1,prm.year_e-prm.year_b+1)
-sty = tts+prm.year_b-1
-tse = np.array([0,2,7,12,17,22,27,32,37,42])   # yrs from 2023, five yr steps after 2025, extended to 2065
-
+sty = tts+prm.year_b-1  # potential start year
+tse = np.array([0,2,7,12,17,22,27,32,37,42])  # yrs from 2023, five yr steps after 2025, extended to 2065
 
 #-------------------------------------------------------------------------
 
-# calculate baseline O3 depletion without SAI: 
-#def odb(x, y = bNAT):
-#   return (((c+(dc*x))/gmcl)*y)*k*2*dac/gmo
-#a = tts
-#for wt in (tts):
-#    dObt = odb(a)
+calculate baseline O3 depletion without SAI: 
+# def odb(x, y = bNAT):
+# return (((c+(dc*x))/gmcl)*y)*k*2*dac
+# a = tts
+# for wt in (tts):
+# dObt = odb(a)
 #-------------------------------------------------------------------------
 
 # calculate mass density of sulfate aerosol to add to Antarctic mid stratosphere for 1 K surface cooling, in g/cm^3 :
@@ -111,22 +111,23 @@ tse = np.array([0,2,7,12,17,22,27,32,37,42])   # yrs from 2023, five yr steps af
 # daec = dae*1e3*1e-6  # mass density of added aerosol in Antarctic mid stratosphere, g/cm^3
 
 dela = 20  # mg/m^2 total column SO4 aerosol increase from CESM2-WACCM, fig. 2 Richter et al (2022), 60-90S, 2035-2054
-daec = (dela/7000)*1e-3 * 1e-6  # mass density g/cm^3 of added SO4 aerosol in Antarctic mid stratosphere 18-25km 
+daec = (dela/7000)*1e-3 * 1e-6  # mass density g/cm^3 of additional SO4 aerosol needed in Antarctic mid stratosphere 18-25km 
 #--------------------------------------------------------------------------
 
 gms = mms/an  # molecular mass of sulfate (g/molec)
 mds = daec/gms  # molecular density of added sulfate (molec/cm^3) at 20km (aproxmated from 18-25km altitude)
 
 # calculate mass density of SO4 from CESM values (ARISE), take year 2 as test
-dae_A2 = prm.dae_A[2]*da20 
-dae_A2 = dae_A2 * 1e-6 * 1e-6
+# dae_A2 = prm.dae_A[2]*da20 
+# dae_A2 = dae_A2 * 1e-6 * 1e-6
 # -------------------------------------------------------------------------
 
-# calculate number density of sulfate aerosol to add to mid stratosphere for 1 K surface cooling, in 
+# calculate number density of sulfate aerosol to add to mid stratosphere for 1 K surface cooling:
+sig = 1.6    # geometric standard deviation for Aitkin and Accumulation mode, from CESM2
 ri = 0.6e-6  # avg particle radius (m) for size distribution (bin?)
 xi = 0.2e-7  # mixing ratio (kg SO4/kg air)
 vi = (4/3)*(pi*(ri**3))*np.exp((9/2)*(np.log(sig))**2)
-ni = xi/(ros*vi)  # number density of sulfate 
+ni = xi/(ros*vi)  # number density of additional mid-stratospheric sulfate needed for 1 K surface cooling 
 # -------------------------------------------------------------------------
 
 # calculate heterogeneous reaction rate for R1:
@@ -178,13 +179,13 @@ print('')
 
 # # calculate ozone depletion resulting from addition of new aerosol in SAI 1K cooling scenario, variable start times
 
-dO23 = -((c+(dc * t0)) * daec)*k*2  #a ozone depletion from (R1), 2023 SAI start (tts= 0) for 1K surface cooling, g cm^-3 s^-1
-#dO35 = -((c+(dc * t3)) * daec)*k*2  # ozone depletion from (R1), 2035 SAI start (tts=12) for 1K surface cooling, g cm^-3 s^-1
-#dO45 = -((c+(dc * t5)) * daec)*k*2  # ozone depletion from (R1), 2045 SAI start (tts=22) for 1K surface cooling, g cm^-3 s^-1
+dO23 = -(((c+(dc * t0))/gmcl) * ni)*k*2   # ozone depletion from (R1), 2023 SAI start (tts= 0) for 1K surface cooling, g cm^-3 s^-1
+#dO35 = -(((c+(dc * t3))/gmcl) * ni)*k*2  # ozone depletion from (R1), 2035 SAI start (tts=12) for 1K surface cooling, g cm^-3 s^-1
+#dO45 = -(((c+(dc * t5))/gmcl) * ni)*k*2  # ozone depletion from (R1), 2045 SAI start (tts=22) for 1K surface cooling, g cm^-3 s^-1
 
-d23m = dO23/gmo  # ozone depletion from reaction R1 (2023 SAI start) in molec/cm^3 
-#d35m = dO35/gmo  # ozone depletion from reaction R1 (2035 SAI start) in molec/cm^3 
-#d45m = dO45/gmo  # ozone depletion from reaction R1 (2045 SAI start) in molec/cm^3 
+d23m = dO23   # ozone depletion from reaction R1 (2023 SAI start) in molec/cm^3 
+#d35m = dO35  # ozone depletion from reaction R1 (2035 SAI start) in molec/cm^3 
+#d45m = dO45  # ozone depletion from reaction R1 (2045 SAI start) in molec/cm^3 
 
 d23s = d23m*dac  # ozone depletion (surface air equivalent) from R1 (2023 start) molec/cm^3, at STP
 d23sr = np.around(d23s, 2)  # rounded to 2 decimal places
@@ -193,12 +194,12 @@ d23sr = np.around(d23s, 2)  # rounded to 2 decimal places
 #d45s = d45m*dac  # ozone depletion (surface air equivalent) from R1 (2045 start) molec/cm^3, at STP
 #d45sr = np.around(d45s, 2)
 
-# d23l = -((c+(dc * t0)) * daec)*ksl*2*dac/gmo  # ozone depletion (surface air eq) from R1 (2023 start) molec/cm^3, at STP, variable SAD & k
-# d25l = -((c+(dc * t1)) * daec)*ksl*2*dac/gmo  # ozone depletion (surface air eq) from R1 (2025 start) molec/cm^3, at STP, variable SAD & k
-# d30l = -((c+(dc * t2)) * daec)*ksl*2*dac/gmo  # ozone depletion (surface air eq) from R1 (2030 start) molec/cm^3, at STP, variable SAD & k
-# d35l = -((c+(dc * t3)) * daec)*ksl*2*dac/gmo  # ozone depletion (surface air eq) from R1 (2035 start) molec/cm^3, at STP, variable SAD & k
-# d40l = -((c+(dc * t4)) * daec)*ksl*2*dac/gmo  # ozone depletion (surface air eq) from R1 (2040 start) molec/cm^3, at STP, variable SAD & k
-# d45l = -((c+(dc * t5)) * daec)*ksl*2*dac/gmo  # ozone depletion (surface air eq) from R1 (2045 start) molec/cm^3, at STP, variable SAD & k
+# d23l = -(((c+(dc * t0))/gmcl) * ni)*ksl*2*dac  # ozone depletion (surface air eq) from R1 (2023 start) molec/cm^3, at STP, variable SAD & k
+# d25l = -(((c+(dc * t1))/gmcl) * ni)*ksl*2*dac  # ozone depletion (surface air eq) from R1 (2025 start) molec/cm^3, at STP, variable SAD & k
+# d30l = -(((c+(dc * t2))/gmcl) * ni)*ksl*2*dac  # ozone depletion (surface air eq) from R1 (2030 start) molec/cm^3, at STP, variable SAD & k
+# d35l = -(((c+(dc * t3))/gmcl) * ni)*ksl*2*dac  # ozone depletion (surface air eq) from R1 (2035 start) molec/cm^3, at STP, variable SAD & k
+# d40l = -(((c+(dc * t4))/gmcl) * ni)*ksl*2*dac  # ozone depletion (surface air eq) from R1 (2040 start) molec/cm^3, at STP, variable SAD & k
+# d45l = -(((c+(dc * t5))/gmcl) * ni)*ksl*2*dac  # ozone depletion (surface air eq) from R1 (2045 start) molec/cm^3, at STP, variable SAD & k
 # --------------------------------------------------------------------------------------------------------
 
 #  calculate stratospheric column ozone depletion in Dobson Units (DU)
@@ -217,7 +218,6 @@ def odp(x, y = ni):
 a = tts
 for wt in tts:
     dO3t = odp(a)
-
 
 # print outputs with string ('words.......') labels
 
@@ -261,7 +261,7 @@ plt.plot()
 #-------------------------------------------------------------------------
 
 # Calculate O3 depletion vs Cl with SAD error scanarios:
-def odps(x,y = daec2):
+def odps(x,y = ni):
     def ksae(w,z = cgsc):
         return (0.25*ut*z*w)   
     a = sade
@@ -269,9 +269,9 @@ def odps(x,y = daec2):
         kse = ksae(a) # reaction rate (rxns cm^-3 s^-1) based on error scenario values for SAD
     kse = np.array([kse]) 
     
-    return ((c+(dc*x))*y)*kse*2*dac/gmo   
-a = tse   
-for ts in tse:
+    return (((c+(dc*x))/gmcl)*y)*kse*2*dac   
+a = tts   
+for ts in tts:
     docs = odps(a)    
 docs = np.array([docs])   
 #-------------------------------------------------------------------------
